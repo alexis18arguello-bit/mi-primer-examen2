@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendario de Equipos de Béisbol</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1000px;
+    margin: auto;
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,.1);
+}
+
+h1 {
+    text-align: center;
+    color: #1e3a5f;
+    margin-bottom: 20px;
+}
+
+.formulario {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+input, button {
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 5px;
+}
+
+input {
+    border: 1px solid #ccc;
+}
+
+button {
+    background: #0d6efd;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #0b5ed7;
+}
+
+.eliminar {
+    background: #dc3545;
+}
+
+.eliminar:hover {
+    background: #bb2d3b;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: #1e3a5f;
+    color: white;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+}
+
+@media (max-width: 700px) {
+    .formulario {
+        flex-direction: column;
+    }
+
+    input, button {
+        width: 100%;
+    }
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+    <h1>⚾ Calendario de Equipos de Béisbol</h1>
+
+    <div class="formulario">
+        <input type="date" id="fecha">
+        <input type="text" id="equipoLocal" placeholder="Equipo Local">
+        <input type="text" id="equipoVisitante" placeholder="Equipo Visitante">
+        <button onclick="agregarJuego()">Agregar Juego</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Equipo Local</th>
+                <th>Equipo Visitante</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody id="tablaJuegos"></tbody>
+    </table>
+</div>
+
+<script>
+// Cargar datos guardados o usar ejemplos
+let juegos = JSON.parse(localStorage.getItem("juegosBeisbol")) || [
+    {
+        fecha: "2026-07-01",
+        local: "Leones",
+        visitante: "Tigres"
+    },
+    {
+        fecha: "2026-07-03",
+        local: "Águilas",
+        visitante: "Gigantes"
+    }
+];
+
+function guardarDatos() {
+    localStorage.setItem("juegosBeisbol", JSON.stringify(juegos));
+}
+
+function mostrarJuegos() {
+    const tabla = document.getElementById("tablaJuegos");
+    tabla.innerHTML = "";
+
+    juegos.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+
+    juegos.forEach((juego, indice) => {
+        tabla.innerHTML += `
+            <tr>
+                <td>${formatearFecha(juego.fecha)}</td>
+                <td>${juego.local}</td>
+                <td>${juego.visitante}</td>
+                <td>
+                    <button class="eliminar" onclick="eliminarJuego(${indice})">
+                        Eliminar
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function agregarJuego() {
+    const fecha = document.getElementById("fecha").value;
+    const local = document.getElementById("equipoLocal").value.trim();
+    const visitante = document.getElementById("equipoVisitante").value.trim();
+
+    if (!fecha || !local || !visitante) {
+        alert("Por favor completa todos los campos.");
+        return;
+    }
+
+    juegos.push({
+        fecha,
+        local,
+        visitante
+    });
+
+    guardarDatos();
+    mostrarJuegos();
+
+    document.getElementById("fecha").value = "";
+    document.getElementById("equipoLocal").value = "";
+    document.getElementById("equipoVisitante").value = "";
+}
+
+function eliminarJuego(indice) {
+    if (confirm("¿Eliminar este juego?")) {
+        juegos.splice(indice, 1);
+        guardarDatos();
+        mostrarJuegos();
+    }
+}
+
+function formatearFecha(fecha) {
+    const opciones = {
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+    };
+
+    return new Date(fecha).toLocaleDateString("es-ES", opciones);
+}
+
+mostrarJuegos();
+</script>
+
+</body>
+</html>
